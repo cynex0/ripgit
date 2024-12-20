@@ -1,7 +1,7 @@
 # ripgit 🦀
 
-**ripgit** is an attempt to reimagine Git, written entirely in Rust.
-This project is a learning experience and not meant for production use.
+**ripgit** is a (partial) rewrite of Git, in Rust.
+This project is a learning experience and not meant for actual use.
 
 ---
 
