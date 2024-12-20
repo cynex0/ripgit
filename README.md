@@ -21,7 +21,7 @@ The goal of **ripgit** is to serve as a learning experience for diving deeper in
 
 - Inspired by the original [Git](https://git-scm.com/).
 - Name inspired by [ripgrep](https://github.com/BurntSushi/ripgrep).
-- Written in [Rust](https://www.rust-lang.org/).
+- Written in [Rust](https://www.rust-lang.org/), with [Clap](https://docs.rs/clap/latest/clap/index.html).
 
 ### References
 - [Write Yourself a Git](https://wyag.thb.lt/#intro).
