@@ -102,4 +102,25 @@ mod repo_tests {
 
         env::set_current_dir(orig_dir).unwrap();
     }
+
+    #[test]
+    fn should_find_first() {
+        let orig_dir = env::current_dir().unwrap();
+        let temp_dir = TempDir::new("find_test_3").unwrap();
+        env::set_current_dir(temp_dir.path()).unwrap();
+
+        let target_path = temp_dir.path().join("1/2/.git");
+        fs::create_dir_all(temp_dir.path().join("1/.git")).unwrap();
+        fs::create_dir_all(&target_path).unwrap();
+        assert!(target_path.exists());
+        assert!(temp_dir.path().join("1/.git").exists());
+
+        if let Some(p) = Repository::find(target_path.parent().unwrap().join("3")) {
+            assert_eq!(p.gitdir, target_path);
+        } else {
+            assert!(false);
+        }
+
+        env::set_current_dir(orig_dir).unwrap();
+    }
 }
