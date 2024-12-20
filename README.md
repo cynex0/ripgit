@@ -13,6 +13,8 @@ The goal of **ripgit** is to serve as a learning experience for diving deeper in
 
 ## Features
 
+**ripgit** is **not** a feature-complete Git, and will probably never be.
+Currently, it has these features implemented:
 - Blazingly fast
 
 ---
