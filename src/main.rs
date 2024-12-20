@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
-use core::repository::Repository;
 use std::env;
+use std::path::PathBuf;
 mod commands;
 mod core;
 
@@ -21,21 +21,20 @@ enum Commands {
 
 fn main() {
     let cli = Cli::parse();
-    let mut repository: Option<Repository> = None;
 
     match cli.command {
         Some(Commands::Init { path }) => {
-            let res = match path {
-                Some(p) => commands::init::run_init(p),
-                None => commands::init::run_init(env::current_dir().unwrap()),
+            let path = if let Some(p) = path {
+                PathBuf::from(p)
+            } else {
+                env::current_dir().unwrap()
             };
 
-            match res {
-                Ok(r) => {
-                    println!("Initialized a git repository at {:?}", r.gitdir);
-                    repository = Some(r);
+            match commands::init::run_init(&path) {
+                Ok(_) => {
+                    println!("Initialized a git repository at {:?}", &path);
                 }
-                Err(e) => println!("Error: {}", e),
+                Err(e) => println!("{:?}", e),
             }
         }
         None => {}
