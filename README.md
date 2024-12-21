@@ -1,13 +1,18 @@
 # ripgit 🦀
 
-**ripgit** is an attempt to reimagine Git, written entirely in Rust.
-This project is a learning experience and not meant for production use.
+**ripgit** is a (partial) rewrite of Git, in Rust.
+This project is a learning experience and not meant for actual use.
 
 ---
 
 ## Purpose
 
-The goal of **ripgit** is to serve as a learning experience for diving deeper into Rust and the inner workings of version control systems.
+Instead of a boring desciption, I wrote a haiku:
+```
+Each borrow a step
+A cub seeks to learn the way - 
+Basics turn to skill 
+```
 
 ---
 
