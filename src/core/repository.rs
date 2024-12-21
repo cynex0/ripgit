@@ -1,9 +1,10 @@
 use crate::core::config::Config;
+use anyhow::{anyhow, Result};
 use std::path::{Path, PathBuf};
 
 pub struct Repository {
     pub gitdir: PathBuf,
-    pub worktreee: PathBuf,
+    pub worktree: PathBuf,
     pub config: Config,
 }
 
@@ -13,18 +14,18 @@ impl Repository {
     /// Ok if the given path contains a valid .git
     ///
     /// Err otherwise
-    pub fn new<P>(path: P) -> Result<Repository, &'static str>
+    pub fn new<P>(path: P) -> Result<Repository>
     where
         P: AsRef<Path>,
     {
         let path = path.as_ref().join(".git");
         if !path.exists() {
-            Err("Not a git repository")
+            Err(anyhow!("Not a git repository"))
         } else {
-            let config = Config::new();
+            let config = Config::read(&path)?;
             Ok(Repository {
                 gitdir: path.clone(),
-                worktreee: path.parent().unwrap().to_path_buf(),
+                worktree: path.parent().unwrap().to_path_buf(),
                 config,
             })
         }

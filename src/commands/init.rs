@@ -2,15 +2,17 @@ use anyhow::{anyhow, Context, Result};
 use std::fs;
 use std::path::PathBuf;
 
+use crate::core::config::Config;
 /// Creates a .git directory at the specified path
 pub fn run_init(path: &PathBuf) -> Result<()> {
     let path = path.join(".git");
-    if !path.exists() {
-        fs::create_dir_all(path).with_context(|| "Failed to create .git directory")?;
-        Ok(())
-    } else {
-        Err(anyhow!("Already a git repository"))
+    if path.exists() {
+        return Err(anyhow!("Already a git repository"));
     }
+
+    fs::create_dir_all(&path).with_context(|| "Failed to create .git directory")?;
+    Config::new().write(&path)?;
+    Ok(())
 }
 
 #[cfg(test)]

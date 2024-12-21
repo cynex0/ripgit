@@ -6,4 +6,5 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.94"
 clap = { version = "4.5.23", features = ["derive"] }
+rust-ini = "0.21.1"
 tempdir = "0.3.7"

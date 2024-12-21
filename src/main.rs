@@ -4,6 +4,7 @@ use std::env;
 use std::path::PathBuf;
 mod commands;
 mod core;
+mod utils;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
