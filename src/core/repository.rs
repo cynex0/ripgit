@@ -1,6 +1,11 @@
 use crate::core::config::Config;
 use anyhow::{anyhow, Result};
-use std::path::{Path, PathBuf};
+use std::{
+    path::{Path, PathBuf},
+    usize::MAX,
+};
+
+use super::config::CoreSection;
 
 pub struct Repository {
     pub gitdir: PathBuf,
@@ -36,8 +41,10 @@ impl Repository {
         P: AsRef<Path>,
     {
         for p in path.as_ref().ancestors() {
-            if let Ok(repo) = Repository::new(p) {
-                return Some(repo);
+            println!("Checking {:?}", p);
+            match Repository::new(p) {
+                Ok(repo) => return Some(repo),
+                Err(e) => println!("Not a repo: {:?}", e),
             }
         }
         None
@@ -47,19 +54,29 @@ impl Repository {
 #[cfg(test)]
 mod repo_tests {
     use super::*;
+    use crate::commands::init::run_init;
     use std::env;
-    use std::fs;
     use tempdir::TempDir;
+
+    fn create_repo<P: AsRef<Path>>(path: P) {
+        if let Ok(_) = run_init(path.as_ref()) {
+            println!("Initialized repo at {:?}", path.as_ref());
+        } else {
+            assert!(false);
+        }
+    }
 
     #[test]
     fn should_find_in_same_dir() {
         let orig_dir = env::current_dir().unwrap();
         let temp_dir = TempDir::new("find_test_1").unwrap();
-        env::set_current_dir(temp_dir.path()).unwrap();
+        let temp_dir = temp_dir.path();
+        env::set_current_dir(&temp_dir).unwrap();
 
-        let gitdir = temp_dir.path().join(".git");
-        fs::create_dir(&gitdir).unwrap();
+        create_repo(temp_dir);
+        let gitdir = temp_dir.join(".git");
         assert!(gitdir.exists());
+        println!("Created .git in {:?}", temp_dir);
 
         if let Some(repo) = Repository::find(&temp_dir) {
             assert_eq!(repo.gitdir, gitdir);
@@ -74,13 +91,14 @@ mod repo_tests {
     fn should_find_in_nested_dir() {
         let orig_dir = env::current_dir().unwrap();
         let temp_dir = TempDir::new("find_test_2").unwrap();
-        env::set_current_dir(temp_dir.path()).unwrap();
+        let temp_dir = temp_dir.path();
+        env::set_current_dir(temp_dir).unwrap();
 
-        let gitdir = temp_dir.path().join(".git");
-        fs::create_dir(&gitdir).unwrap();
+        create_repo(temp_dir);
+        let gitdir = temp_dir.join(".git");
         assert!(gitdir.exists());
 
-        if let Some(repo) = Repository::find(&temp_dir.path().join("foo/bar/rust/is/cool")) {
+        if let Some(repo) = Repository::find(&temp_dir.join("foo/bar/rust/is/cool")) {
             assert_eq!(repo.gitdir, gitdir);
         } else {
             assert!(false);
@@ -93,11 +111,12 @@ mod repo_tests {
     fn should_not_find_if_not_exists() {
         let orig_dir = env::current_dir().unwrap();
         let temp_dir = TempDir::new("find_test_3").unwrap();
-        env::set_current_dir(temp_dir.path()).unwrap();
+        let temp_dir = temp_dir.path();
+        env::set_current_dir(temp_dir).unwrap();
 
-        assert!(!temp_dir.path().join(".git").exists());
+        assert!(!temp_dir.join(".git").exists());
 
-        if let Some(_) = Repository::find(&temp_dir.path().join("foo/bar/rust/is/cool")) {
+        if let Some(_) = Repository::find(&temp_dir.join("foo/bar/rust/is/cool")) {
             assert!(false);
         }
 
@@ -107,14 +126,15 @@ mod repo_tests {
     #[test]
     fn should_find_first() {
         let orig_dir = env::current_dir().unwrap();
-        let temp_dir = TempDir::new("find_test_3").unwrap();
-        env::set_current_dir(temp_dir.path()).unwrap();
+        let temp_dir = TempDir::new("find_test_4").unwrap();
+        let temp_dir = temp_dir.path();
+        env::set_current_dir(temp_dir).unwrap();
 
-        let target_path = temp_dir.path().join("1/2/.git");
-        fs::create_dir_all(temp_dir.path().join("1/.git")).unwrap();
-        fs::create_dir_all(&target_path).unwrap();
+        create_repo(temp_dir.join("1"));
+        create_repo(temp_dir.join("1/2"));
+        let target_path = temp_dir.join("1/2/.git");
         assert!(target_path.exists());
-        assert!(temp_dir.path().join("1/.git").exists());
+        assert!(temp_dir.join("1/.git").exists());
 
         if let Some(p) = Repository::find(target_path.parent().unwrap().join("3")) {
             assert_eq!(p.gitdir, target_path);

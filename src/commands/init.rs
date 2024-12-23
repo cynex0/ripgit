@@ -1,11 +1,14 @@
 use anyhow::{anyhow, Context, Result};
 use std::fs;
-use std::path::PathBuf;
+use std::path::Path;
 
 use crate::core::config::Config;
 /// Creates a .git directory at the specified path
-pub fn run_init(path: &PathBuf) -> Result<()> {
-    let path = path.join(".git");
+pub fn run_init<P>(path: P) -> Result<()>
+where
+    P: AsRef<Path>,
+{
+    let path = path.as_ref().join(".git");
     if path.exists() {
         return Err(anyhow!("Already a git repository"));
     }
@@ -18,6 +21,7 @@ pub fn run_init(path: &PathBuf) -> Result<()> {
 #[cfg(test)]
 mod init_tests {
     use super::*;
+    use std::path::PathBuf;
     use tempdir::TempDir;
 
     #[test]
