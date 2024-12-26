@@ -13,14 +13,6 @@ struct Cli {
     command: Option<Commands>,
 }
 
-#[derive(clap::ValueEnum, Clone, Debug)]
-enum Object {
-    Blob,
-    Commit,
-    Tree,
-    Tag,
-}
-
 #[derive(Subcommand, Debug)]
 enum Commands {
     Init {
@@ -35,7 +27,7 @@ enum Commands {
     Find {}, // TODO: for testing only, remove later!
     CatFile {
         /// Type of the object
-        type_: Object,
+        type_: utils::git_object_types::GitObjectTypes,
         /// Hash of the object
         hash: String,
     },
@@ -43,6 +35,8 @@ enum Commands {
         /// Write the object to disk
         #[arg(short, long)]
         write: bool,
+        #[arg(short, long)]
+        type_: Option<utils::git_object_types::GitObjectTypes>,
         /// File to hash
         path: String,
     },
@@ -77,8 +71,15 @@ fn main() {
         Some(Commands::CatFile { type_, hash }) => {
             commands::cat_file::run_cat_file(&current_dir, &hash);
         }
-        Some(Commands::HashObject { write, path }) => {
-            if let Ok(hash) = commands::hash_object::run_hash_object(&current_dir.join(path)) {
+        Some(Commands::HashObject { write, type_, path }) => {
+            let mut type_ = type_;
+            if type_.is_none() {
+                type_ = Some(utils::git_object_types::GitObjectTypes::Blob); // blob by default
+            }
+
+            if let Ok(hash) =
+                commands::hash_object::run_hash_object(&current_dir.join(path), type_.unwrap())
+            {
                 println!("{}", hash);
             } else {
                 println!("Failed to hash object");

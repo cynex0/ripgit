@@ -43,7 +43,7 @@ impl Repository {
         for p in path.as_ref().ancestors() {
             match Repository::new(p) {
                 Ok(repo) => return Some(repo),
-                Err(e) => println!("Not a repo: {:?}", e),
+                Err(_) => continue,
             }
         }
         None

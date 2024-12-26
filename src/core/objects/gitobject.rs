@@ -3,6 +3,7 @@ use anyhow::{anyhow, Result};
 use sha1::{Digest, Sha1};
 use std::fs;
 use std::io::Write;
+use std::path::Path;
 use std::str::from_utf8;
 use std::{fs::File, io::Read};
 
@@ -12,6 +13,17 @@ pub trait GitObject {
     where
         Self: Sized;
     fn type_str(&self) -> &str;
+
+    fn from_file<P>(repo: &Repository, path: P) -> Result<Self>
+    where
+        Self: Sized,
+        P: AsRef<Path>,
+    {
+        let mut file = File::open(path)?;
+        let mut data = Vec::new();
+        file.read_to_end(&mut data)?;
+        Ok(Self::deserialize(&data))
+    }
 
     fn read_object(repo: &Repository, sha: &str) -> Result<Self>
     where
@@ -36,7 +48,7 @@ pub trait GitObject {
         Ok(Self::deserialize(body))
     }
 
-    fn write_object(&self, repo: &Repository) -> Result<String> {
+    fn write_object(&self, repo: Option<&Repository>) -> Result<String> {
         let data = self.serialize();
         let header = format!("{} {}\0", self.type_str(), data.len());
         let obj = [header.as_bytes(), &data].concat();
@@ -45,14 +57,16 @@ pub trait GitObject {
         hasher.update(&obj);
         let hash = format!("{:x}", hasher.finalize());
 
-        let object_dir = repo.gitdir.join("objects").join(&hash[..2]);
-        let object_path = object_dir.join(&hash[2..]);
+        if let Some(repo) = repo {
+            let object_dir = repo.gitdir.join("objects").join(&hash[..2]);
+            let object_path = object_dir.join(&hash[2..]);
 
-        fs::create_dir_all(&object_dir)?;
-        let mut file = File::create(&object_path)?;
-        let mut encoder =
-            flate2::write::ZlibEncoder::new(&mut file, flate2::Compression::default());
-        encoder.write_all(&obj)?;
+            fs::create_dir_all(&object_dir)?;
+            let mut file = File::create(&object_path)?;
+            let mut encoder =
+                flate2::write::ZlibEncoder::new(&mut file, flate2::Compression::default());
+            encoder.write_all(&obj)?;
+        }
 
         Ok(hash)
     }

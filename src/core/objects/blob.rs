@@ -41,7 +41,7 @@ mod blob_tests {
         let repo = Repository::new(&temp_dir.path()).unwrap();
 
         let blob = create_blob();
-        if let Ok(sha) = blob.write_object(&repo) {
+        if let Ok(sha) = blob.write_object(Some(&repo)) {
             let new_blob = Blob::read_object(&repo, &sha).unwrap();
             let string = String::from_utf8(new_blob.blobdata.clone()).unwrap();
             assert_eq!(blob.blobdata, new_blob.blobdata);
