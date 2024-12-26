@@ -41,7 +41,6 @@ impl Repository {
         P: AsRef<Path>,
     {
         for p in path.as_ref().ancestors() {
-            println!("Checking {:?}", p);
             match Repository::new(p) {
                 Ok(repo) => return Some(repo),
                 Err(e) => println!("Not a repo: {:?}", e),

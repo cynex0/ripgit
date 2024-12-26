@@ -13,6 +13,14 @@ struct Cli {
     command: Option<Commands>,
 }
 
+#[derive(clap::ValueEnum, Clone, Debug)]
+enum Object {
+    Blob,
+    Commit,
+    Tree,
+    Tag,
+}
+
 #[derive(Subcommand, Debug)]
 enum Commands {
     Init {
@@ -20,6 +28,10 @@ enum Commands {
         path: Option<String>,
     },
     Find {}, // TODO: for testing only, remove later!
+    CatFile {
+        type_: Object,
+        object: String,
+    },
 }
 
 fn main() {
@@ -47,6 +59,9 @@ fn main() {
             } else {
                 println!("Not a git repository");
             }
+        }
+        Some(Commands::CatFile { type_, object }) => {
+            commands::cat_file::run_cat_file(&current_dir, &object);
         }
         None => {}
     }

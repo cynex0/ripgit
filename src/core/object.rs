@@ -11,7 +11,7 @@ pub enum GitObject {
     Tag {},
 }
 
-fn read_object(repo: Repository, sha: &str) -> Result<GitObject> {
+pub fn read_object(repo: Repository, sha: &str) -> Result<GitObject> {
     let path = repo.gitdir.join("objects").join(&sha[..2]).join(&sha[2..]);
     if !path.exists() {
         return Err(anyhow!("Object does not exist!"));
@@ -34,9 +34,9 @@ fn read_object(repo: Repository, sha: &str) -> Result<GitObject> {
                 data: Vec::from(body),
             })
         }
-        "commit" => todo!(),
-        "tree" => todo!(),
-        "tag" => todo!(),
+        "commit" => return Ok(GitObject::Commit {}),
+        "tree" => return Ok(GitObject::Tree {}),
+        "tag" => return Ok(GitObject::Tag {}),
         _ => Err(anyhow!("Invalid object type in object file!")),
     }
 }
