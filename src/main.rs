@@ -24,13 +24,27 @@ enum Object {
 #[derive(Subcommand, Debug)]
 enum Commands {
     Init {
+        /// Path to initialize a new repository (optional)
+        ///
+        /// If not provided, the current directory is used
+        ///
+        /// If provided, all parent directories are created if they do not exist
         #[arg(short, long)]
         path: Option<String>,
     },
     Find {}, // TODO: for testing only, remove later!
     CatFile {
+        /// Type of the object
         type_: Object,
-        object: String,
+        /// Hash of the object
+        hash: String,
+    },
+    HashObject {
+        /// Write the object to disk
+        #[arg(short, long)]
+        write: bool,
+        /// File to hash
+        path: String,
     },
 }
 
@@ -60,9 +74,23 @@ fn main() {
                 println!("Not a git repository");
             }
         }
-        Some(Commands::CatFile { type_, object }) => {
-            commands::cat_file::run_cat_file(&current_dir, &object);
+        Some(Commands::CatFile { type_, hash }) => {
+            commands::cat_file::run_cat_file(&current_dir, &hash);
+        }
+        Some(Commands::HashObject { write, path }) => {
+            if let Ok(hash) = commands::hash_object::run_hash_object(&current_dir.join(path)) {
+                println!("{}", hash);
+            } else {
+                println!("Failed to hash object");
+            }
+
+            if write {
+                todo!();
+            }
         }
         None => {}
+        _ => {
+            todo!()
+        }
     }
 }

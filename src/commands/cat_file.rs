@@ -1,6 +1,6 @@
-use crate::core::object::{read_object, GitObject};
+use crate::core::objects::blob::Blob;
+use crate::core::objects::gitobject::GitObject;
 use crate::core::repository::Repository;
-use std::env;
 use std::path::Path;
 
 pub fn run_cat_file<P>(path: P, sha: &str)
@@ -9,19 +9,10 @@ where
 {
     // TODO: object search, name resolution
     let repo = Repository::find(path.as_ref()).unwrap();
-    if let Ok(obj) = read_object(repo, sha) {
+    if let Ok(obj) = GitObject::read_object(&repo, sha) {
         match obj {
-            GitObject::Blob { data } => {
-                println!("{}", String::from_utf8(data).unwrap());
-            }
-            GitObject::Commit {} => {
-                todo!();
-            }
-            GitObject::Tree {} => {
-                todo!();
-            }
-            GitObject::Tag {} => {
-                todo!();
+            Blob { blobdata } => {
+                println!("{}", String::from_utf8(blobdata).unwrap());
             }
         }
     } else {
