@@ -1,11 +1,6 @@
 use crate::core::config::Config;
 use anyhow::{anyhow, Result};
-use std::{
-    path::{Path, PathBuf},
-    usize::MAX,
-};
-
-use super::config::CoreSection;
+use std::path::{Path, PathBuf};
 
 pub struct Repository {
     pub gitdir: PathBuf,

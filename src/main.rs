@@ -78,7 +78,7 @@ fn main() {
             }
 
             if let Ok(hash) =
-                commands::hash_object::run_hash_object(&current_dir.join(path), type_.unwrap())
+                commands::hash_object::run_hash_object(current_dir.join(path), type_.unwrap())
             {
                 println!("{}", hash);
             } else {
@@ -90,8 +90,5 @@ fn main() {
             }
         }
         None => {}
-        _ => {
-            todo!()
-        }
     }
 }
